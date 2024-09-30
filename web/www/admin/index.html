@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - My Simple Blog</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css">
+</head>
+<body>
+<nav class="navbar is-primary" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+        <a class="navbar-item" href="#">
+            <strong>My Simple Blog - Admin</strong>
+        </a>
+    </div>
+</nav>
+
+<section class="section">
+    <div class="container">
+        <h1 class="title">Admin Dashboard</h1>
+        <div id="admin-content" style="display: none;">
+            <div class="columns is-multiline">
+                <div class="column is-half">
+                    <button class="button is-primary is-large is-fullwidth" onclick="navigateTo('manage-posts')">
+                        Manage Posts
+                    </button>
+                </div>
+                <div class="column is-half">
+                    <button class="button is-black is-large is-fullwidth" onclick="navigateTo('manage-media')">
+                        Manage Media
+                    </button>
+                </div>
+                <div class="column is-half">
+                    <button class="button is-info is-large is-fullwidth" onclick="navigateTo('manage-comments')">
+                        Manage Comments
+                    </button>
+                </div>
+                <div class="column is-half">
+                    <button class="button is-success is-large is-fullwidth" onclick="navigateTo('manage-categories')">
+                        Manage Categories
+                    </button>
+                </div>
+            </div>
+            <div class="columns">
+                <div class="column">
+                    <button id="logout-button" class="button is-danger">Logout</button>
+                </div>
+            </div>
+        </div>
+        <div id="login-message" style="display: none;">
+            <p class="has-text-danger">Please log in to access the admin dashboard.</p>
+            <a href="/admin/login.html" class="button is-primary">Go to Login</a>
+        </div>
+    </div>
+</section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const adminContent = document.getElementById('admin-content');
+        const loginMessage = document.getElementById('login-message');
+        const logoutButton = document.getElementById('logout-button');
+
+        function checkAuth() {
+            const authToken = localStorage.getItem('authToken');
+            if (authToken) {
+                adminContent.style.display = 'block';
+                loginMessage.style.display = 'none';
+            } else {
+                adminContent.style.display = 'none';
+                loginMessage.style.display = 'block';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('authToken');
+            checkAuth();
+        }
+
+        logoutButton.addEventListener('click', logout);
+
+        window.navigateTo = function(page) {
+            window.location.href = '/admin/'+page+'.html';
+        };
+
+        // Check authentication status when the page loads
+        checkAuth();
+    });
+</script>
+</body>
+</html>

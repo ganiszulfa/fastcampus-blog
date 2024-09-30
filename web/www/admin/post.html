@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Post - Admin Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css">
+</head>
+<body>
+<nav class="navbar is-primary" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+        <a class="navbar-item" href="#">
+            <strong>My Simple Blog - Admin</strong>
+        </a>
+    </div>
+</nav>
+
+<section class="section">
+    <div class="container">
+        <h1 class="title">Create/Edit Post</h1>
+        <form id="edit-post-form">
+            <div class="field">
+                <label class="label">Title</label>
+                <div class="control">
+                    <input class="input" type="text" id="post-title" required>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">Slug</label>
+                <div class="control">
+                    <input class="input" type="text" id="post-slug" required>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">Category</label>
+                <div class="control">
+                    <div class="select">
+                        <select id="post-category" required>
+                            <!-- Categories will be dynamically inserted here -->
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">Body</label>
+                <div class="control">
+                    <textarea class="textarea" id="post-body" rows="10" required></textarea>
+                </div>
+            </div>
+
+            <div class="field is-grouped">
+                <div class="control">
+                    <button type="submit" class="button is-primary">Save Changes</button>
+                </div>
+                <div class="control">
+                    <a href="/admin/manage-posts.html" class="button is-link">Cancel</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+<script src="../vars.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('edit-post-form');
+        const titleInput = document.getElementById('post-title');
+        const slugInput = document.getElementById('post-slug');
+        const bodyInput = document.getElementById('post-body');
+        const categorySelect = document.getElementById('post-category');
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const postSlug = urlParams.get('slug');
+
+        let postId;
+
+        function getAuthToken() {
+            return localStorage.getItem('authToken');
+        }
+
+        function fetchPost() {
+            if (!postSlug) {
+                return;
+            }
+
+            fetch(HOST+'/api/admin/posts/'+urlParams.get('slug'), {
+                headers: {
+                    'Authorization': `Bearer ${getAuthToken()}`
+                }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to fetch post');
+                return response.json();
+            })
+            .then(post => {
+                postId = post.id;
+                titleInput.value = post.title;
+                slugInput.value = post.slug;
+                bodyInput.value = post.body;
+                if (post.category) {
+                    categorySelect.value = post.category.id;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to load post. Please try again later.');
+            });
+        }
+
+        function fetchCategories() {
+            fetch(HOST+'/api/admin/categories', {
+                headers: {
+                    'Authorization': `Bearer ${getAuthToken()}`
+                }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to fetch categories');
+                return response.json();
+            })
+            .then(categories => {
+                categorySelect.innerHTML = categories.map(category =>
+                    `<option value="${category.id}">${category.name}</option>`
+                ).join('');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to load categories. Please try again later.');
+            });
+        }
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const postObject = {
+                id: postId,
+                title: titleInput.value,
+                slug: slugInput.value,
+                body: bodyInput.value,
+                category: { 'id': categorySelect.value }
+            };
+
+            let url = HOST+'/api/admin/posts/'+urlParams.get('slug');
+            let method = 'PUT';
+            if (!postSlug) {
+                url = HOST+'/api/admin/posts';
+                method = 'POST';
+            }
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${getAuthToken()}`
+                },
+                body: JSON.stringify(postObject)
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to update post');
+                return response.json();
+            })
+            .then(() => {
+                alert('Post updated successfully');
+                window.location.href = '/admin/manage-posts.html';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to update post. Please try again.');
+            });
+        });
+
+        fetchPost();
+        fetchCategories();
+    });
+</script>
+</body>
+</html>

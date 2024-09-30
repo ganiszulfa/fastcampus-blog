@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Media - Admin Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css">
+</head>
+<body>
+<nav class="navbar is-primary" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+        <a class="navbar-item" href="#">
+            <strong>My Simple Blog - Admin</strong>
+        </a>
+    </div>
+</nav>
+
+<section class="section">
+    <div class="container">
+        <h1 class="title">Manage Media</h1>
+        <div class="buttons">
+            <a href="/admin/" class="button is-link">Back to Dashboard</a>
+            <button class="button is-primary" onclick="createMedia()">Create New Media</button>
+        </div>
+        <table class="table is-fullwidth">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Image</th>
+            </tr>
+            </thead>
+            <tbody id="media-list">
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<script src="../vars.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const mediaListContainer = document.getElementById('media-list');
+
+        function fetchMedia() {
+            const authToken = localStorage.getItem('authToken');
+            if (!authToken) {
+                window.location.href = '/login';
+                return;
+            }
+
+            fetch(HOST+'/api/admin/media', {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch media');
+                }
+                return response.json();
+            })
+            .then(media => {
+                displayMedia(media);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to load media. Please try again later.');
+            });
+        }
+
+        function displayMedia(mediaList) {
+            mediaListContainer.innerHTML = '';
+            mediaList.forEach(media => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${media.name}</td>
+<!--                    <td><img src="https://storage.googleapis.com/blog-project-ganis/${media.path}"></td>-->
+                    <td><img src="http://cdn.blog.ganis.net/${media.path}"></td>
+                `;
+                mediaListContainer.appendChild(row);
+            });
+        }
+
+        window.createMedia = function() {
+            window.location.href = '/admin/media.html';
+        };
+
+        fetchMedia();
+    });
+</script>
+</body>
+</html>

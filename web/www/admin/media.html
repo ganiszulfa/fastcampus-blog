@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Upload</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css">
+</head>
+<body>
+<nav class="navbar is-primary" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+        <a class="navbar-item" href="#">
+            <strong>My Simple Blog - Admin</strong>
+        </a>
+    </div>
+</nav>
+
+<section class="section">
+    <div class="container">
+        <h1 class="title">File Upload</h1>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <div class="field">
+                <label class="label">File Name</label>
+                <div class="control">
+                    <input class="input" type="text" name="name" placeholder="Enter file name" required>
+                </div>
+            </div>
+            <div class="field">
+                <label class="label">File</label>
+                <div class="control">
+                    <input class="input" type="file" name="file" required>
+                </div>
+            </div>
+            <div class="field">
+                <div class="control">
+                    <button class="button is-primary" type="submit">Upload</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+<script src="../vars.js"></script>
+<script>
+
+function getAuthToken() {
+    return localStorage.getItem('authToken');
+}
+
+document.getElementById('uploadForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+
+    fetch(HOST+'/api/admin/media', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${getAuthToken()}`
+        },
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Upload failed');
+        }
+        return response.json();
+    })
+    .then(data => {
+        window.location.href = '/admin/manage-media.html';
+    })
+    .catch(error => {
+        alert('Upload failed: ' + error.message);
+    });
+});
+</script>
+</body>
+</html>

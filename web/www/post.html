@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Post Title</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css">
+    <script src="https://www.google.com/recaptcha/enterprise.js?render=6LckeksqAAAAAN6j89QWE3kY8HQfyPLX8qEBe97R"></script>
+</head>
+<body>
+<nav class="navbar is-primary" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+        <a class="navbar-item" href="/">
+            <strong>My Blog</strong>
+        </a>
+    </div>
+</nav>
+
+<section class="section">
+    <div class="container">
+        <div id="blog-post">
+        </div>
+
+        <hr>
+
+        <h2 class="title is-4">Comments</h2>
+        <div id="comments">
+        </div>
+
+        <hr>
+
+        <h3 class="title is-5">Add a Comment</h3>
+        <form id="comment-form">
+            <div class="field">
+                <label class="label">Name</label>
+                <div class="control">
+                    <input class="input" type="text" id="comment-name" required>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">Email</label>
+                <div class="control">
+                    <input class="input" type="email" id="comment-email" required>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">Comment</label>
+                <div class="control">
+                    <textarea class="textarea" id="comment-body" required></textarea>
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="control">
+                    <button class="g-recaptcha button is-primary"
+                            data-sitekey="6LckeksqAAAAAN6j89QWE3kY8HQfyPLX8qEBe97R"
+                            data-callback='onSubmit'
+                            data-action='createComment'>
+                        Submit
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+<script src="vars.js"></script>
+<script>
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+
+    function onSubmit(token) {
+            const name = document.getElementById('comment-name').value;
+            const email = document.getElementById('comment-email').value;
+            const body = document.getElementById('comment-body').value;
+            const post = { "slug": urlParams.get('slug') } ;
+
+            fetch(HOST+'/api/public/comments?postSlug='+urlParams.get('slug'), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name, email, body, post, token }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(newComment => {
+                const commentElement = createCommentElement(newComment);
+                commentsContainer.appendChild(commentElement);
+                commentForm.reset();
+            })
+            .catch(error => {
+                console.error('Error submitting comment:', error);
+                alert('Error submitting comment. Please try again.');
+            });
+        };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const blogPostContainer = document.getElementById('blog-post');
+        const commentsContainer = document.getElementById('comments');
+        const commentForm = document.getElementById('comment-form');
+
+        function fetchBlogPost() {
+            fetch(HOST+'/api/public/posts/'+urlParams.get('slug'))
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(post => {
+                    displayBlogPost(post);
+                    fetchComments();
+                })
+                .catch(error => {
+                    console.error('Error fetching blog post:', error);
+                    blogPostContainer.innerHTML = '<p class="has-text-danger">Error loading blog post. Please try again later.</p>';
+                });
+        }
+
+        function displayBlogPost(post) {
+            blogPostContainer.innerHTML = `
+                <h1 class="title">${post.title}</h1>
+                <p class="subtitle">
+                    ${new Date(post.publishedAt*1000).toLocaleDateString()} |
+                    ${post.category.name}
+                </p>
+                <div class="content">
+                    ${post.body}
+                </div>
+            `;
+        }
+
+        function fetchComments() {
+            fetch(HOST+'/api/public/comments?postSlug='+urlParams.get('slug'))
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(comments => {
+                    displayComments(comments);
+                })
+                .catch(error => {
+                    console.error('Error fetching comments:', error);
+                    commentsContainer.innerHTML = '<p class="has-text-danger">Error loading comments. Please try again later.</p>';
+                });
+        }
+
+        function displayComments(comments) {
+            commentsContainer.innerHTML = '';
+            comments.forEach(comment => {
+                const commentElement = createCommentElement(comment);
+                commentsContainer.appendChild(commentElement);
+            });
+        }
+
+        function createCommentElement(comment) {
+            const article = document.createElement('article');
+            article.className = 'media';
+            article.innerHTML = `
+                <div class="media-content">
+                    <div class="content">
+                        <p>
+                            <strong>${comment.name}</strong> <small>${new Date(comment.createdAt*1000).toLocaleDateString()}</small>
+                            <br>
+                            ${comment.body}
+                        </p>
+                    </div>
+                </div>
+            `;
+            return article;
+        }
+
+
+
+        fetchBlogPost();
+    });
+</script>
+</body>
+</html>

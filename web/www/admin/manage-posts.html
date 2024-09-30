@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Posts - Admin Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css">
+</head>
+<body>
+<nav class="navbar is-primary" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+        <a class="navbar-item" href="#">
+            <strong>My Simple Blog - Admin</strong>
+        </a>
+    </div>
+</nav>
+
+<section class="section">
+    <div class="container">
+        <h1 class="title">Manage Posts</h1>
+        <div class="buttons">
+            <a href="/admin/" class="button is-link">Back to Dashboard</a>
+            <button class="button is-primary" onclick="createPost()">Create New Post</button>
+        </div>
+        <table class="table is-fullwidth">
+            <thead>
+            <tr>
+                <th>Title</th>
+                <th>Published</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody id="posts-list">
+            <!-- Posts will be dynamically inserted here -->
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<script src="../vars.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const postsListContainer = document.getElementById('posts-list');
+
+        function fetchPosts() {
+            const authToken = localStorage.getItem('authToken');
+            if (!authToken) {
+                window.location.href = '/login';
+                return;
+            }
+
+            fetch(HOST+'/api/admin/posts', {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch posts');
+                }
+                return response.json();
+            })
+            .then(posts => {
+                displayPosts(posts);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to load posts. Please try again later.');
+            });
+        }
+
+        function displayPosts(posts) {
+            postsListContainer.innerHTML = '';
+            posts.forEach(post => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${post.title}</td>
+                    <td>${post.published ? 'Yes' : 'No'}</td>
+                    <td>
+                        <button class="button is-small is-info" onclick="editPost('${post.slug}')">Edit</button>
+                        <button class="button is-small is-danger" onclick="deletePost(${post.id}, this)">Delete</button>
+                        <button class="button is-small is-warning" ${post.published ? 'disabled': ''}  onclick="publishPost(${post.id}, this)">Publish</button>
+                    </td>
+                `;
+                postsListContainer.appendChild(row);
+            });
+        }
+
+        window.editPost = function(slug) {
+            window.location.href = `/admin/post.html?slug=${slug}`;
+        };
+
+        window.deletePost = function(id, button) {
+            if (confirm('Are you sure you want to delete this post?')) {
+                const authToken = localStorage.getItem('authToken');
+                fetch(HOST+'/api/admin/posts/'+id, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to delete post');
+                    }
+                    button.closest('tr').remove();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to delete post. Please try again.');
+                });
+            }
+        };
+
+        window.publishPost = function(id, button) {
+            if (confirm('Are you sure you want to publish this post?')) {
+                const authToken = localStorage.getItem('authToken');
+                fetch(HOST+'/api/admin/posts/'+id+'/publish', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to delete post');
+                    }
+                    location.reload();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to delete post. Please try again.');
+                });
+            }
+        };
+
+        window.createPost = function() {
+            window.location.href = '/admin/post.html';
+        };
+
+        fetchPosts();
+    });
+</script>
+</body>
+</html>

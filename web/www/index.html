@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Simple Blog</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css">
+</head>
+<body>
+<nav class="navbar is-primary" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+        <a class="navbar-item" href="/">
+            <strong>My Blog</strong>
+        </a>
+    </div>
+</nav>
+
+<section class="section">
+    <div class="container">
+        <div id="blog-posts" class="columns is-multiline">
+        </div>
+    </div>
+</section>
+
+<script src="vars.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const blogPostsContainer = document.getElementById('blog-posts');
+
+        function fetchBlogPosts() {
+            fetch(HOST+'/api/public/posts')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(posts => {
+                    displayBlogPosts(posts);
+                })
+                .catch(error => {
+                    console.error('Error fetching blog posts:', error);
+                    blogPostsContainer.innerHTML = '<p class="has-text-danger">Error loading blog posts. Please try again later.</p>';
+                });
+        }
+
+        function displayBlogPosts(posts) {
+            blogPostsContainer.innerHTML = '';
+            posts.forEach(post => {
+                const postElement = createPostElement(post);
+                blogPostsContainer.appendChild(postElement);
+            });
+        }
+
+        function createPostElement(post) {
+            const column = document.createElement('div');
+            column.className = 'column is-12';
+
+            const card = document.createElement('div');
+            card.className = 'card';
+
+            const cardContent = document.createElement('div');
+            cardContent.className = 'card-content';
+
+            const title = document.createElement('p');
+            title.className = 'title is-4';
+            title.innerHTML = `<a href='/post.html?slug=${post.slug}'>${post.title}</a>`;
+
+            const excerpt = document.createElement('p');
+            excerpt.className = 'subtitle is-6';
+            excerpt.innerHTML = post.body.split(' ').slice(0, 40).join(' ') + '...';
+
+            const meta = document.createElement('div');
+            meta.className = 'content';
+            meta.innerHTML = `
+                <p>
+                     <strong>${post.category.name}</strong> |
+                     ${new Date(post.publishedAt*1000).toLocaleDateString()} |
+                     ${post.commentCount} Comment(s)
+                </p>
+            `;
+
+            cardContent.appendChild(title);
+            cardContent.appendChild(excerpt);
+            cardContent.appendChild(meta);
+            card.appendChild(cardContent);
+            column.appendChild(card);
+
+            return column;
+        }
+
+        fetchBlogPosts();
+    });
+</script>
+</body>
+</html>
+
+
+
+
+
