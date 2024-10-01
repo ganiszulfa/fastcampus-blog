@@ -58,7 +58,6 @@ public class CommentPublicControllerTests {
 
         GetCommentResponse getCommentResponse = new GetCommentResponse();
         getCommentResponse.setName("ganis");
-        getCommentResponse.setEmail("ganis@example.com");
         getCommentResponse.setBody("first comment!");
         getCommentResponse.setId(1);
 

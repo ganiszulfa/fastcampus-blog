@@ -5,6 +5,7 @@ import com.fastcampus.blog.entity.Post;
 import com.fastcampus.blog.repository.CommentRepository;
 import com.fastcampus.blog.repository.PostRepository;
 import com.fastcampus.blog.service.JwtService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,12 @@ public class CategoryAdminControllerIntegrationTests {
         commentRepository.deleteAll();
     }
 
+    @AfterEach
+    void afterEach() {
+        postRepository.deleteAll();
+        commentRepository.deleteAll();
+    }
+
     @Test
     void getCategories_givenValid_ShouldReturnOk() throws Exception {
         String jwtToken = jwtService.generateTokenByUsername("ganis");
@@ -58,7 +65,7 @@ public class CategoryAdminControllerIntegrationTests {
                         .header(HEADER_NAME, "Bearer %s".formatted(jwtToken)))
                 .andExpect(status().isOk())
                 .andExpect(content().json("""
-                        []
+                        {"id":1,"name":"Tutorial","slug":"tutorial"}
                         """, true));
     }
 
@@ -87,18 +94,20 @@ public class CategoryAdminControllerIntegrationTests {
     @Test
     void updateCategory_givenValid_ShouldReturnOk() throws Exception {
         String jwtToken = jwtService.generateTokenByUsername("ganis");
-        mockMvc.perform(put("/api/admin/categories/1")
+        mockMvc.perform(put("/api/admin/categories")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
+                                "id": 1,
                                 "name": "New Name",
                                 "slug": "new-name"
                                 }
                                 """)
                         .header(HEADER_NAME, "Bearer %s".formatted(jwtToken)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(content().json("""
                        {
+                       "id": 1,
                        "name": "New Name",
                        "slug": "new-name"
                        }
@@ -113,7 +122,7 @@ public class CategoryAdminControllerIntegrationTests {
                 .andExpect(status().isOk())
                 .andExpect(content().json("""
                        {
-                       "id": 1,
+                       "id": 1
                        }
                        """, true));
     }

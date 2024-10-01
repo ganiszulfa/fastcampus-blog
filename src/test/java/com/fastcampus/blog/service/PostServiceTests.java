@@ -1,7 +1,9 @@
 package com.fastcampus.blog.service;
 
+import com.fastcampus.blog.entity.Category;
 import com.fastcampus.blog.entity.Post;
 import com.fastcampus.blog.mapper.PostMapper;
+import com.fastcampus.blog.repository.CategoryRepository;
 import com.fastcampus.blog.repository.PostRepository;
 import com.fastcampus.blog.request.post.CreatePostRequest;
 import com.fastcampus.blog.response.post.CreatePostResponse;
@@ -17,6 +19,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.Instant;
+import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 
@@ -27,6 +30,9 @@ public class PostServiceTests {
     @Autowired
     @InjectMocks
     PostService postService;
+
+    @Mock
+    CategoryRepository categoryRepository;
 
     @Mock
     PostRepository postRepository;
@@ -45,9 +51,17 @@ public class PostServiceTests {
 
     @Test
     void createPost_givenValid_shouldReturnOk() {
+        final var category = new CreatePostRequest.Category();
+        category.setId(1);
         CreatePostRequest postRequest = new CreatePostRequest();
         postRequest.setTitle("post title");
         postRequest.setSlug("post slug");
+        postRequest.setCategory(category);
+
+        Category cat = new Category();
+        cat.setName("new-cat");
+        cat.setId(1);
+        when(categoryRepository.findById(1)).thenReturn(Optional.of(cat));
 
         Post post = PostMapper.INSTANCE.mapToCreatePostResponse(postRequest);
         post.setCommentCount(0L);

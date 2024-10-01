@@ -32,10 +32,11 @@ public class CategoryPublicIntegrationTests {
         mockMvc.perform(get("/api/public/categories"))
                 .andExpect(status().isOk())
                 .andExpect(content().json("""
-                        [
+                        [ {
                         "id" : 1,
                         "name" : "General",
                         "slug" : "general"
+                        }
                         ]
                         """, true)
                 );

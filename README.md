@@ -67,3 +67,7 @@ Diharapkan ikuti videonya biar langkah-langkah di bawah dimengerti.
 **Q**: Saya dapet error `org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'entityManagerFactory' defined in class path resource`
 
 **A**: Pastikan container mysql sudah jalan.
+
+**Q**: Saya dapet error `java.lang.NullPointerException: Cannot invoke "org.hibernate.engine.jdbc.spi.SqlExceptionHelper.convert(java.sql.SQLException, String)" because the return value of "org.hibernate.resource.transaction.backend.jdbc.internal.JdbcIsolationDelegate.sqlExceptionHelper()" is null`
+
+**A**: Create database bernama blogtest atau yg tertera di `src/test/resources/application.properties`

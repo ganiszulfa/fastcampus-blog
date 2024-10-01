@@ -29,17 +29,12 @@ public class PostPublicControllerIntegrationTests {
         Post post = new Post();
         post.setSlug("slug1");
         post.setTitle("title1");
-        post.setId(1);
         postRepository.save(post);
 
         mockMvc.perform(get("/api/public/posts/slug1"))
                 .andExpect(status().isOk())
                 .andExpect(content().json("""
-                        {
-                            "id" : 1,
-                            "title" : "title1",
-                            "slug" : "slug1"
-                        }
+                        {"title":"title1","body":null,"slug":"slug1","category":null,"publishedAt":null,"commentCount":null,"published":false}
                         """));
     }
 
