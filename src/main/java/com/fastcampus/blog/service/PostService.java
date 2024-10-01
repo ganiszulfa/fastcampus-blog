@@ -42,7 +42,7 @@ public class PostService {
         return PostMapper.INSTANCE.mapToGetPostResponse(post);
     }
 
-//    @Cacheable(value="PostService.getPostBySlug", key = "{#request.slug, #isDeleted}")
+    @Cacheable(value="PostService.getPostBySlug", key = "{#request.slug, #isDeleted}")
     public GetPostResponse getPostBySlug(GetPostBySlugRequest request, boolean isDeleted) {
         Post post = postRepository
                 .findFirstBySlugAndIsDeleted(request.getSlug(), isDeleted)
@@ -99,6 +99,7 @@ public class PostService {
         return PublishPostResponse.builder().publishedAt(post.getPublishedAt()).build();
     }
 
+    @Cacheable(value="PostService.getPostsByRequest", key = "{#request.pageNo, #request.limit}")
     public List<GetPostResponse> getPosts(GetPostsRequest request) {
         List<Post> posts = postRepository.findByIsDeletedOrderByCreatedAtDesc(false);
         List<GetPostResponse> responses = new ArrayList<>();
@@ -106,7 +107,7 @@ public class PostService {
         return responses;
     }
 
-//    @Cacheable(value="PostService.getPosts", key = "{#isDeleted, #isPublished, #request.pageNo}")
+    @Cacheable(value="PostService.getPostsPublic", key = "{#isDeleted, #isPublished, #request.pageNo}")
     public List<GetPostResponse> getPosts(GetPostsRequest request, boolean isDeleted, boolean isPublished) {
         List<Post> posts = postRepository.findByIsDeletedAndIsPublishedOrderByPublishedAtDesc(isDeleted, isPublished);
         List<GetPostResponse> responses = new ArrayList<>();

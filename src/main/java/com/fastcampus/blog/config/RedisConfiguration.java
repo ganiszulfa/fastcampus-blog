@@ -12,11 +12,12 @@ import java.time.Duration;
 @Configuration
 public class RedisConfiguration {
 
+
     @Bean
     public RedisCacheConfiguration redisCacheConfiguration() {
         return RedisCacheConfiguration.defaultCacheConfig()
                 .disableCachingNullValues()
-                .entryTtl(Duration.ofSeconds(300L))
+                .entryTtl(Duration.ofSeconds(60L))
                 .serializeKeysWith(RedisSerializationContext
                         .SerializationPair.fromSerializer(new StringRedisSerializer()))
                 .serializeValuesWith(RedisSerializationContext
@@ -25,10 +26,7 @@ public class RedisConfiguration {
 
     @Bean
     public RedisCacheManager cacheManager(RedisConnectionFactory redisConnectionFactory) {
-        RedisCacheConfiguration cacheConfiguration = RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(Duration.ofMinutes(10)) // Set Time-to-Live to 10 minutes
-                .disableCachingNullValues();
-
+        RedisCacheConfiguration cacheConfiguration = redisCacheConfiguration();
         return RedisCacheManager.builder(redisConnectionFactory)
                 .cacheDefaults(cacheConfiguration)
                 .build();
