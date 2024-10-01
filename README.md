@@ -1,9 +1,8 @@
 # Welcome
 
-Selamat datang!
-Repo ini adalah pelengkap course 1 dan 2.
-Ini adalah aplikasi blog sederhana yang dibangun menggunakan Java 21, Spring Boot, dan Maven.
+Selamat datang! Repo ini adalah pelengkap course 1 dan 2. Ini adalah aplikasi blog sederhana yang dibangun menggunakan Java 21, Spring Boot, dan Maven.
 Aplikasi ini memiliki fitur untuk membuat, mengedit, dan menghapus posting blog, autentikasi pengguna, dan lainnya.
+
 
 ## Table of Contents
 
@@ -25,6 +24,8 @@ Aplikasi ini memiliki fitur untuk membuat, mengedit, dan menghapus posting blog,
 
 ## Installation
 
+Diharapkan ikuti videonya biar langkah-langkah di bawah dimengerti.
+
 1. **Clone the Repository**:
 
    ```bash
@@ -42,10 +43,15 @@ Aplikasi ini memiliki fitur untuk membuat, mengedit, dan menghapus posting blog,
    - Di PHPMyAdmin, buat database: `blog` atau sesuaikan dengan value di `application-dev.properties`
    - Tambahkan file `secret.properties` isinya sesuaikan dengan `SecretProperties.java`
 
-3. **Configure Run Configs**:
+4. **Configure Flyway & Migrate DB**:
+   - Buka Run Configurations di Intellij (run -> edit configurations)
+   - Tambah New Configuration (alt + insert)
+   - Pilih maven, dan isi `validate flyway:migrate -Dflyway.configFiles=src/main/resources/application-dev.properties`
+   - Run
+     
+5. **Configure Run Configs**:
    - Buka Run Configurations di Intellij (run -> edit configurations)
    - Set environment variables dengan `SPRING_PROFILES_ACTIVE=dev`
-   - Ok dan apply
 
 ## Usage
 
