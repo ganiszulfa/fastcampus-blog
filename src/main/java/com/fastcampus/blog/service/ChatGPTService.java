@@ -38,8 +38,7 @@ public class ChatGPTService {
     public String generatePostByTitleAndLength(String title, Integer length) {
 
         HttpHeaders headers = new HttpHeaders();
-//        headers.set("Authorization", "Bearer %s".formatted(secretProperties.getChatGptKey()));
-        headers.set("Authorization", "Bearer %s".formatted("i am testing sorry"));
+        headers.set("Authorization", "Bearer %s".formatted(secretProperties.getChatGptKey()));
 
         final var responseFormat = GeneratePostRequest.ResponseFormat.builder()
                 .type("text").build();

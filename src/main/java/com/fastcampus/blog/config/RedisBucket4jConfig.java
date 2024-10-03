@@ -1,9 +1,11 @@
 package com.fastcampus.blog.config;
 
+import com.fastcampus.blog.properties.RedisProperties;
 import io.github.bucket4j.distributed.proxy.ProxyManager;
 import io.github.bucket4j.grid.jcache.JCacheProxyManager;
 import org.redisson.config.Config;
 import org.redisson.jcache.configuration.RedissonConfiguration;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -18,11 +20,23 @@ public class RedisBucket4jConfig {
 
     private final String cacheName = "bucket4j-rate-limits";
 
+    @Autowired
+    RedisProperties redisProperties;
+
     @Bean
     public Config redissonConfig() {
         Config config = new Config();
-        // todo: change to prop
-        config.useSingleServer().setAddress("redis://localhost:6379");
+        String addr = "%s:%s".formatted(redisProperties.getHost(), redisProperties.getPort());
+        addr = "redis://%s".formatted(addr);
+        config.useSingleServer().setAddress(addr);
+        if (!redisProperties.getPassword().isBlank()) {
+            config.useSingleServer().setPassword(redisProperties.getPassword());
+        }
+        config.useSingleServer()
+                .setSubscriptionConnectionMinimumIdleSize(1)
+                .setSubscriptionConnectionPoolSize(2)
+                .setConnectionPoolSize(8)
+                .setConnectionMinimumIdleSize(2);
         return config;
     }
 
